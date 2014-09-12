@@ -1,0 +1,5 @@
+{
+  "traversals" : [
+    {"name" : "real_wsdm.RealWSDMTraversal", "order" : "before"}
+  ]
+}

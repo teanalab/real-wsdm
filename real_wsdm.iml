@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module cursive.leiningen.project.LeiningenProjectsManager.isLeinModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/clojure" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Leiningen: clojure-complete:0.2.3" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/clojure:1.6.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/data.json:0.2.5" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/tools.nrepl:0.2.3" level="project" />
+    <orderEntry type="library" name="Leiningen: org.lemurproject.galago/core:3.7-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Leiningen: info.bliki.wiki/bliki-core:3.0.19" level="project" />
+    <orderEntry type="library" name="Leiningen: org.lemurproject.galago/tupleflow:3.7-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Leiningen: org.reflections/reflections:0.9.8" level="project" />
+    <orderEntry type="library" name="Leiningen: org.xerial.snappy/snappy-java:1.0.5-M4" level="project" />
+    <orderEntry type="library" name="Leiningen: xmlenc:0.52" level="project" />
+    <orderEntry type="library" name="Leiningen: commons-httpclient:3.1" level="project" />
+    <orderEntry type="library" name="Leiningen: commons-codec:1.2" level="project" />
+    <orderEntry type="library" name="Leiningen: commons-logging:1.0.4" level="project" />
+    <orderEntry type="library" name="Leiningen: net.sf.trove4j/trove4j:3.0.3" level="project" />
+    <orderEntry type="library" name="Leiningen: org.apache.commons/commons-compress:1.8" level="project" />
+    <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-server:7.6.8.v20121106" level="project" />
+    <orderEntry type="library" name="Leiningen: org.ggf.drmaa/drmaa:1.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.lemurproject.galago/utility:3.7-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Leiningen: org.tukaani/xz:1.5" level="project" />
+    <orderEntry type="library" name="Leiningen: org.eclipse.jetty.orbit/javax.servlet:2.5.0.v201103041518" level="project" />
+    <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-continuation:7.6.8.v20121106" level="project" />
+    <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-http:7.6.8.v20121106" level="project" />
+    <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-io:7.6.8.v20121106" level="project" />
+    <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-util:7.6.8.v20121106" level="project" />
+    <orderEntry type="library" name="Leiningen: com.google.guava/guava:11.0.2" level="project" />
+    <orderEntry type="library" name="Leiningen: dom4j:1.6.1" level="project" />
+    <orderEntry type="library" name="Leiningen: javassist:3.12.1.GA" level="project" />
+    <orderEntry type="library" name="Leiningen: com.google.code.findbugs/jsr305:1.3.9" level="project" />
+    <orderEntry type="library" name="Leiningen: xml-apis:1.0.b2" level="project" />
+  </component>
+</module>
+
