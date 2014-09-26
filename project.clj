@@ -8,7 +8,8 @@
   :java-source-paths ["src/java"]
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/data.json "0.2.5"]
-                 [org.lemurproject.galago/core "3.7-SNAPSHOT"]]
+                 [org.lemurproject.galago/contrib "3.7-SNAPSHOT"]]
   :main ^:skip-aot real-wsdm.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}}
+  :jvm-opts ["-Xmx7g"])
