@@ -2,6 +2,8 @@ package real_wsdm;
 
 import org.lemurproject.galago.core.index.stats.AggregateStatistic;
 import org.lemurproject.galago.core.index.stats.NodeStatistics;
+import org.lemurproject.galago.core.parse.stem.KrovetzStemmer;
+import org.lemurproject.galago.core.parse.stem.Stemmer;
 import org.lemurproject.galago.core.retrieval.GroupRetrieval;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.query.MalformedQueryException;
@@ -11,22 +13,24 @@ import org.lemurproject.galago.core.retrieval.traversal.Traversal;
 import org.lemurproject.galago.core.util.TextPartAssigner;
 import org.lemurproject.galago.utility.Parameters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Weighted Sequential Dependency Model model is structurally similar to the
  * Sequential Dependency Model, however node weights are the linear combination
  * of some node features.
- *
+ * <p>
  * (based on bendersky 2012)
- *
+ * <p>
  * In particular the weight for a node "term" is determined as a linear
  * combination of features:
- *
+ * <p>
  * Feature def for RWSDM: <br>
  * { <br>
  * name : "1-gram" <br>
@@ -41,6 +45,7 @@ import java.util.logging.Logger;
  */
 public class RealWSDMTraversal extends Traversal {
     private static final Logger logger = Logger.getLogger("RWSDM");
+    private static Stemmer stemmer = new KrovetzStemmer();
     private Retrieval retrieval;
     private GroupRetrieval gRetrieval;
     private Parameters globalParams;
@@ -256,6 +261,20 @@ public class RealWSDMTraversal extends Traversal {
                     }
 
                     break;
+
+                case EXTERNAL:
+                    assert (!featureValues.containsKey(f));
+
+                    // if the feature weight is 0 -- don't compute the feature
+                    if (queryParams.get(f.name, f.defLambda) == 0.0) {
+                        break;
+                    }
+
+                    if (f.containsNGram(term)) {
+                        featureValues.put(f, Math.log(f.getNGramValue(term)));
+                    }
+
+                    break;
             }
         }
 
@@ -398,6 +417,20 @@ public class RealWSDMTraversal extends Traversal {
                     // only add the value if it occurs in the collection (log (0) = -Inf)
                     if (featureStats.nodeFrequency != 0) {
                         featureValues.put(f, Math.log(featureStats.nodeFrequency));
+                    }
+
+                    break;
+
+                case EXTERNAL:
+                    assert (!featureValues.containsKey(f));
+
+                    // if the feature weight is 0 -- don't compute the feature
+                    if (queryParams.get(f.name, f.defLambda) == 0.0) {
+                        break;
+                    }
+
+                    if (f.containsNGram(term1, term2)) {
+                        featureValues.put(f, Math.log(f.getNGramValue(term1, term2)));
                     }
 
                     break;
@@ -552,6 +585,20 @@ public class RealWSDMTraversal extends Traversal {
                     }
 
                     break;
+
+                case EXTERNAL:
+                    assert (!featureValues.containsKey(f));
+
+                    // if the feature weight is 0 -- don't compute the feature
+                    if (queryParams.get(f.name, f.defLambda) == 0.0) {
+                        break;
+                    }
+
+                    if (f.containsNGram(term1, term2, term3)) {
+                        featureValues.put(f, Math.log(f.getNGramValue(term1, term2, term3)));
+                    }
+
+                    break;
             }
         }
 
@@ -571,7 +618,7 @@ public class RealWSDMTraversal extends Traversal {
 
     public static enum RWSDMFeatureType {
 
-        LOGTF, LOGDF, CONST, LOGNGRAMTF;
+        LOGTF, LOGDF, CONST, LOGNGRAMTF, EXTERNAL
     }
 
     /*
@@ -594,6 +641,9 @@ public class RealWSDMTraversal extends Traversal {
         public boolean unigram;
         public boolean bigram;
         public boolean trigram;
+        public Map<List<String>, Integer> featureValues;
+
+        private static Map<String, Map<List<String>, Integer>> valuesCache = new HashMap<>();
 
         public RWSDMFeature(Parameters p) {
             this.name = p.getString("name");
@@ -604,6 +654,15 @@ public class RealWSDMTraversal extends Traversal {
             this.unigram = p.get("unigram", true);
             this.bigram = p.get("bigram", !unigram);
             this.trigram = p.get("trigram", !unigram && !bigram);
+            if (this.type.equals(RWSDMFeatureType.EXTERNAL)) {
+                String path = p.getString("path");
+                if (valuesCache.containsKey(path)) {
+                    this.featureValues = valuesCache.get(path);
+                } else {
+                    this.featureValues = readFeatureValues(p.getString("path"));
+                    valuesCache.put(path, this.featureValues);
+                }
+            }
         }
 
         /*
@@ -618,6 +677,35 @@ public class RealWSDMTraversal extends Traversal {
             this.unigram = unigram;
             this.bigram = !unigram;
             this.trigram = !unigram;
+        }
+
+        private List<String> stemNGram(List<String> grams) {
+            return grams.stream().map(stemmer::stem).collect(Collectors.toList());
+        }
+
+        public boolean containsNGram(String... grams) {
+            return featureValues.containsKey(stemNGram(Arrays.asList(grams)));
+        }
+
+        public Integer getNGramValue(String... grams) {
+            return featureValues.get(stemNGram(Arrays.asList(grams)));
+        }
+
+        private Map<List<String>, Integer> readFeatureValues(String path) {
+            Map<List<String>, Integer> values = new HashMap<>();
+            logger.info(String.format("Start reading values from %s", path));
+            try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split("\\t");
+                    String[] grams = parts[0].split(" ");
+                    values.put(Arrays.asList(grams), Integer.parseInt(parts[1]));
+                }
+            } catch (IOException x) {
+                System.err.format("IOException: %s%n", x);
+            }
+            logger.info(String.format("Finished reading values from %s", path));
+            return values;
         }
     }
 }
