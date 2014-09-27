@@ -87,28 +87,47 @@
   [index-path queries-file]
   (batch-search System/out wsdm-traversal index-path queries-file))
 
-(def features-config
+(defn features-config
+  [wiki-path wiki-titles-path]
   {:rwsdmFeatures
     [
-      ;{:name    "1-const"
-      ; :type    "const"
-      ; :unigram true}
+      {:name    "1-const"
+      :type    "const"
+      :unigram true}
       {:name    "1-lntf"
-       :type    "logtf"
-       :unigram true}
+      :type    "logtf"
+      :unigram true}
       {:name    "1-lndf"
-       :type    "logdf"
-       :unigram true}
+      :type    "logdf"
+      :unigram true}
+      {:name    "1-wiki"
+      :type    "external"
+      :path    wiki-path
+      :unigram true}
+      {:name    "1-wiki-titles"
+      :type    "external"
+      :path    wiki-titles-path
+      :unigram true}
       ;{:name    "2-const"
       ; :type    "const"
       ; :unigram false
       ; :bigram  true}
       {:name    "2-lntf"
-       :type    "logtf"
-       :unigram false
-       :bigram  true}
-      {:name    "2-lndf"
-       :type    "logdf"
+      :type    "logtf"
+      :unigram false
+      :bigram  true}
+      ;{:name    "2-lndf"
+      ;:type    "logdf"
+      ;:unigram false
+      ;:bigram  true}
+      ;{:name    "2-wiki"
+      ; :type    "external"
+      ; :path    wiki-path
+      ; :unigram false
+      ; :bigram  true}
+      {:name    "2-wiki-titles"
+       :type    "external"
+       :path    wiki-titles-path
        :unigram false
        :bigram  true}
       ;{:name    "3-const"
@@ -116,50 +135,50 @@
       ; :unigram false
       ; :bigram  false
       ; :trigram true}
-      {:name    "3-lntf"
-       :type    "logtf"
-       :unigram false
-       :bigram  false
-       :trigram true}
-      {:name    "3-lndf"
-       :type    "logdf"
-       :unigram false
-       :bigram  false
-       :trigram true}
+      ;{:name    "3-lntf"
+      ; :type    "logtf"
+      ; :unigram false
+      ; :bigram  false
+      ; :trigram true}
+      ;{:name    "3-lndf"
+      ; :type    "logdf"
+      ; :unigram false
+      ; :bigram  false
+      ; :trigram true}
+      ;{:name    "3-wiki"
+      ; :type    "external"
+      ; :path    wiki-path
+      ; :unigram false
+      ; :bigram  false
+      ; :trigram true}
+      {:name    "3-wiki-titles"
+      :type    "external"
+      :path    wiki-titles-path
+      :unigram false
+      :bigram  false
+      :trigram true}
       ]})
 
 (def learnable-config
   {:learnableParameters
-               [
-                 ;{:name "1-const"
-                 ; :max  3.0
-                 ; :min  0.0}
-                 {:name "1-lntf"
-                  :max  3.0
-                  :min  0.0}
-                 {:name "1-lndf"
-                  :max  3.0
-                  :min  0.0}
-                 ;{:name "2-const"
-                 ; :max  3.0
-                 ; :min  0.0}
-                 {:name "2-lntf"
-                  :max  3.0
-                  :min  0.0}
-                 {:name "2-lndf"
-                  :max  3.0
-                  :min  0.0}
-                 ;{:name "3-const"
-                 ; :max  3.0
-                 ; :min  0.0}
-                 {:name "3-lntf"
-                  :max  3.0
-                  :min  0.0}
-                 {:name "3-lndf"
-                  :max  3.0
-                  :min  0.0}
-                 ]
-   :learner    "coord"})
+            [
+              ; {:name "1-const"}
+              {:name "1-lntf"}
+              {:name "1-lndf"}
+              {:name "1-wiki"}
+              {:name "1-wiki-titles"}
+              ; {:name "2-const"}
+              {:name "2-lntf"}
+              ;{:name "2-lndf"}
+              ;{:name "2-wiki"}
+              {:name "2-wiki-titles"}
+              ; {:name "3-const"}
+              ; {:name "3-lntf"}
+              ; {:name "3-lndf"}
+              ; {:name "3-wiki"}
+              {:name "3-wiki-titles"}
+              ]
+   :learner "coord"})
 ;:initialParameters
 ; [(Parameters/parseString "{
 ; \"1-const\": 1,
@@ -183,12 +202,18 @@
                      ;"1-const"
                      "1-lntf"
                      "1-lndf"
+                     "1-wiki"
+                     "1-wiki-titles"
                      ;"2-const"
                      "2-lntf"
-                     "2-lndf"
+                     ;"2-lndf"
+                     ;"2-wiki"
+                     "2-wiki-titles"
                      ;"3-const"
-                     "3-lntf"
-                     "3-lndf"
+                     ;"3-lntf"
+                     ;"3-lndf"
+                     ;"3-wiki"
+                     "3-wiki-titles"
                      ])
     (.set "value" 1.0)))
 
@@ -199,13 +224,13 @@
 ;    file))
 
 (defn learn
-  [index-path queries-file judgements-filepath]
+  [index-path queries-file judgements-filepath wiki-path wiki-titles-path]
   (let [parameters (doto (Parameters/instance)
                      ;(.set "verboseRWSDM" true)
                      (.set "index" index-path)
                      (.set "qrels" judgements-filepath)
                      (.copyFrom (Parameters/parseString (queries-json wsdm-traversal queries-file)))
-                     (.copyFrom (Parameters/parseString (json/write-str features-config)))
+                     (.copyFrom (Parameters/parseString (json/write-str (features-config wiki-path wiki-titles-path))))
                      (.copyFrom (Parameters/parseString (json/write-str learnable-config)))
                      (.set "normalization" [normalization-parameters])
                      (.copyFrom (-> "traversal-config.json" io/resource io/file str Parameters/parseFile)))]
