@@ -29,8 +29,21 @@
     {}
     (map #(->> % tokenize (map stem) extract-ngrams) lines)))
 
-(defn -main
+(defn titles
+  [lines]
+  (reduce
+    add-ngram
+    {}
+    (filter #(<= (count %) 3) (map #(->> % tokenize (map stem)) lines))))
+
+(defn extract-ngrams
   [wiki-titles-path]
   (with-open [rdr (io/reader wiki-titles-path)]
-    (doseq [[:ngram count] (ngram-count (line-seq rdr))]
+    (doseq [[ngram count] (ngram-count (line-seq rdr))]
       (println (str (str/join " " ngram) "\t" count)))))
+
+(defn extract-titles
+  [wiki-titles-path]
+  (with-open [rdr (io/reader wiki-titles-path)]
+    (doseq [[ngram _] (titles (line-seq rdr))]
+      (println (str (str/join " " ngram) "\t" 100)))))
